@@ -7,3 +7,4 @@
 [submodule "software/HomeAssistant-lib"]
 	path = software/HomeAssistant-lib
 	url = https://gitee.com/Ai-Thinker-Open/Ai-M6x_HomeAssistant-C.git
+

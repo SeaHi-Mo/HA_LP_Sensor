@@ -4,10 +4,17 @@ include(proj.conf)
 
 find_package(bouffalo_sdk REQUIRED HINTS $ENV{BL_SDK_BASE})
 
-file(GLOB_RECURSE sources ${CMAKE_CURRENT_SOURCE_DIR}/components/*.c)
+file(GLOB_RECURSE sources
+    ${CMAKE_CURRENT_SOURCE_DIR}/components/*.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/components/device_state/*.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/components/HomeAssistant/*.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/components/wifi/*.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/components/flash/*.c)
+
 sdk_add_include_directories(.)
 sdk_add_include_directories(main systemConfig)
-sdk_add_include_directories(components/wifi)
+
+sdk_add_include_directories(components/wifi components/device_state components/HomeAssistant components/flash)
 
 aux_source_directory(../Ai-mqtt-lib/driver SRC_FILES)
 
@@ -24,7 +31,7 @@ aux_source_directory(../Ai-mqtt-lib/3rdparty/aiio/aiio_tls/aiio-tls-crypto SRC_F
 aux_source_directory(../Ai-mqtt-lib/3rdparty/aiio/mqtt/aiio_mqtt SRC_FILES)
 aux_source_directory(../Ai-mqtt-lib/3rdparty/aiio/mqtt/aiio_mqtt/lib SRC_FILES)
 
-# aux_source_directory(../Ai-mqtt-lib/3rdparty/blufi SRC_FILES)
+aux_source_directory(../Ai-mqtt-lib/3rdparty/blufi SRC_FILES)
 
 # 添加头文件的引用路径（Add .h include directories）
 sdk_add_include_directories(../Ai-mqtt-lib/driver)
@@ -48,7 +55,7 @@ sdk_add_include_directories(../Ai-mqtt-lib/3rdparty/aiio/aiio_http_server/src/po
 sdk_add_include_directories(../Ai-mqtt-lib/3rdparty/aiio/mqtt/aiio_mqtt/lib/include)
 sdk_add_include_directories(../Ai-mqtt-lib/3rdparty/aiio/mqtt/aiio_mqtt/include)
 
-# sdk_add_include_directories(./../Ai-mqtt-lib/3rdparty/blufi)
+sdk_add_include_directories(./../Ai-mqtt-lib/3rdparty/blufi)
 
 # 添加HomeAssistant 库
 file(GLOB_RECURSE HA ${CMAKE_CURRENT_SOURCE_DIR}/../HomeAssistant-lib/HomeAssistant-C/*.c)
