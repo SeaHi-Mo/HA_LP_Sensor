@@ -34,6 +34,7 @@
 #include "axk_blufi.h"
 #include "ble_interface.h"
 #include "blufi_security.h"
+#include "bl616_pm.h"
 #define DEVICE_HW_SERSION "v1.0.0"
 
 typedef enum {

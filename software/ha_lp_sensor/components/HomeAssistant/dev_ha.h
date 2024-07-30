@@ -19,7 +19,7 @@
 
 #define HA_DEVICE_NAME "传感器采集主板"
 #define HA_DEVICE_MANUFACTURER "SeaHi"
-#define HA_DEVICE_MODEL "Ai-WB2"
+#define HA_DEVICE_MODEL "Ai-M62-CBS"
 
 void device_homeAssistant_init(homeAssisatnt_device_t* dev_ha);
 

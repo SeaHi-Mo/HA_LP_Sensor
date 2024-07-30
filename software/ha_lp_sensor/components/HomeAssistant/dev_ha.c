@@ -28,19 +28,28 @@ void ha_event_cb(ha_event_t event, homeAssisatnt_device_t* dev)
                 .name = "温度传感器",
                 .unique_id = "T01",
                 .device_class = Class_temperature,
+                .qos = 1,
             };
             static ha_sensor_entity_t H_sensor = {
                 .name = "湿度传感器",
                 .unique_id = "H01",
                 .device_class = Class_humidity,
+                .qos = 1,
+            };
+            static ha_sensor_entity_t BAT_sensor = {
+                .name = "电池电量",
+                .unique_id = "bat01",
+                .device_class = Class_battery,
+                .qos = 1,
             };
             homeAssistant_device_add_entity(CONFIG_HA_ENTITY_SENSOR, &T_sensor);
             homeAssistant_device_add_entity(CONFIG_HA_ENTITY_SENSOR, &H_sensor);
-
+            homeAssistant_device_add_entity(CONFIG_HA_ENTITY_SENSOR, &BAT_sensor);
             homeAssistant_device_send_status(HOMEASSISTANT_STATUS_ONLINE);
-            dev_msg.device_state = DEVICE_STATE_HOMEASSISTANT_CONNECT;
 
-            // device_state_update(false, &dev_msg);
+            dev_msg.device_state = DEVICE_STATE_HOMEASSISTANT_CONNECT;
+            // homeAssistant_device_send_entity_state(CONFIG_HA_ENTITY_SENSOR, &BAT_sensor, 100);
+            device_state_machine_update(false, &dev_msg);
             break;
             /*  服务器断开事件  */
         case HA_EVENT_MQTT_DISCONNECT:
@@ -90,6 +99,7 @@ void device_homeAssistant_init(homeAssisatnt_device_t* dev_ha)
     if (dev_ha->mqtt_info.mqtt_username==NULL) dev_ha->mqtt_info.mqtt_username = dev_ha->name;
     if (dev_ha->mqtt_info.mqtt_password==NULL)dev_ha->mqtt_info.mqtt_password = "12345678";
 
+    dev_ha->mqtt_info.mqtt_keeplive = 60*60;//一个小时的心跳
     HA_LOG_I("------------------mqtt msg----------------------\r\n");
     HA_LOG_I("mqtt host:%s\r\n", dev_ha->mqtt_info.mqtt_host);
     HA_LOG_I("mqtt port:%d\r\n", dev_ha->mqtt_info.port);

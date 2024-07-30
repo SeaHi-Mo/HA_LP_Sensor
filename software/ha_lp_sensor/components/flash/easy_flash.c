@@ -96,7 +96,7 @@ bool flash_save_mqtt_info(void* value)
     }
     ha_mqtt_info_t* mqtt_info = (ha_mqtt_info_t*)value;
     int result = 0;
-    LOG_I("addr=%s port=%d\r\n", mqtt_info->mqtt_host, mqtt_info->port);
+    // LOG_I("addr=%s port=%d\r\n", mqtt_info->mqtt_host, mqtt_info->port);
     if (mqtt_info->mqtt_host!=NULL)
     {
         result = ef_set_bytes(flash_key[FLASH_MQTT_HOST], mqtt_info->mqtt_host, strlen(mqtt_info->mqtt_host));

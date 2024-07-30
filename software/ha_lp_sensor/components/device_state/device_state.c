@@ -20,6 +20,9 @@ static QueueHandle_t device_queue_handle;
 static TaskHandle_t state_machine_handle;
 static homeAssisatnt_device_t ha_dev;
 
+static float Temperature;
+static uint8_t humidity;
+static uint8_t bat_value;
 static void device_state_machine(void* arg)
 {
     dev_msg_t* dev_msg = pvPortMalloc(sizeof(dev_msg_t));
@@ -42,6 +45,8 @@ static void device_state_machine(void* arg)
                         // flash_save_device_boot_cnt(0);
                     }
                 }
+                sht30_read_Temperature_and_humidity(&Temperature, &humidity);
+
             }
             break;
             case DEVICE_STATE_WIFI_START:
@@ -49,7 +54,6 @@ static void device_state_machine(void* arg)
                 HA_LOG_I("DEVICE_STATE_WIFI_START\r\n");
                 //读取WiFi 信息
                 int ret = flash_get_wifi_info(&dev_msg->wifi_info);
-                HA_LOG_I(" ret=%d\r\n", ret);
                 if (strlen(dev_msg->wifi_info.ssid)==0) {
                     memset(dev_msg->wifi_info.ssid, 0, 64);
                     memset(dev_msg->wifi_info.password, 0, 64);
@@ -59,7 +63,6 @@ static void device_state_machine(void* arg)
                 else {
                     HA_LOG_I("ssid=%s passs=%s  f=%d\r\n", dev_msg->wifi_info.ssid, dev_msg->wifi_info.password, dev_msg->wifi_info.frequency);
                 }
-
                 wifi_mgmr_sta_quickconnect(dev_msg->wifi_info.ssid, dev_msg->wifi_info.password, 0, (2412+5*13));
             }
             break;
@@ -76,6 +79,35 @@ static void device_state_machine(void* arg)
 
             }
             break;
+            case DEVICE_STATE_HOMEASSISTANT_CONNECT:
+            {
+                HA_LOG_I("DEVICE_STATE_HOMEASSISTANT_CONNECT\r\n");
+                ha_sensor_entity_t* temp = homeAssistant_fine_entity(CONFIG_HA_ENTITY_SENSOR, "T01");
+                ha_sensor_entity_t* humi = homeAssistant_fine_entity(CONFIG_HA_ENTITY_SENSOR, "H01");
+                ha_sensor_entity_t* bat = homeAssistant_fine_entity(CONFIG_HA_ENTITY_SENSOR, "bat01");
+                if (temp!=NULL) {
+                    temp->sensor_data = (char*)pvPortMalloc(3);
+                    memset(temp->sensor_data, 0, 3);
+                    sprintf(temp->sensor_data, "%0.2f", Temperature);
+                }
+                if (humi!=NULL) {
+                    humi->sensor_data = (char*)pvPortMalloc(3);
+                    memset(humi->sensor_data, 0, 3);
+                    sprintf(humi->sensor_data, "%d", humidity);
+                }
+                if (bat!=NULL) {
+                    bat->sensor_data = (char*)pvPortMalloc(3);
+                    memset(bat->sensor_data, 0, 3);
+                    sprintf(bat->sensor_data, "%d", bat_value);
+                }
+
+                homeAssistant_device_send_entity_state(CONFIG_HA_ENTITY_SENSOR, temp, 1);
+                homeAssistant_device_send_entity_state(CONFIG_HA_ENTITY_SENSOR, humi, 1);
+                homeAssistant_device_send_entity_state(CONFIG_HA_ENTITY_SENSOR, bat, 1);
+                vTaskDelay(pdMS_TO_TICKS(50));
+                pm_hbn_mode_enter(PM_HBN_LEVEL_0, 32768*60*60);
+            }
+            break;
             default:
                 break;
         }
@@ -86,7 +118,7 @@ static void device_state_machine(void* arg)
 void device_state_machine_start(void)
 {
     device_queue_handle = xQueueCreate(2, sizeof(dev_msg_t));
-
+    sth30_i2c_device_init();
     xTaskCreate(device_state_machine, "state_machine", 1024, NULL, 2, &state_machine_handle);
     static dev_msg_t dev_msg = {
          .device_state = DEVICE_STATE_SYSTEM_START,
