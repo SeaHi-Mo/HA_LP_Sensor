@@ -15,6 +15,14 @@
 #include "dev_ha.h"
 #include "log.h"
 #include <queue.h>
+
+#include <lwip/tcpip.h>
+#include <lwip/sockets.h>
+#include <lwip/netdb.h>
+#include "export/bl_fw_api.h"
+#include "wifi_mgmr_ext.h"
+#include "wifi_mgmr.h"
+
 #include "wifi_event.h"
 #include "easy_flash.h"
 // #include <hal_wifi.h>
@@ -57,6 +65,7 @@ typedef struct wifi_code_info {
     uint8_t chan_id;
     char ipv4_addr[16];
     uint32_t addr_ip;
+    uint16_t frequency;
 }wifi_info_t;
 
 typedef struct device_state_handle {

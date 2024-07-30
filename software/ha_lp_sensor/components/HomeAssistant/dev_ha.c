@@ -24,8 +24,20 @@ void ha_event_cb(ha_event_t event, homeAssisatnt_device_t* dev)
         case HA_EVENT_MQTT_CONNECED:
             HA_LOG_I("<<<<<<<<<<  HA_EVENT_MQTT_CONNECED\r\n");
 
-            homeAssistant_device_send_status(HOMEASSISTANT_STATUS_ONLINE);
+            static ha_sensor_entity_t T_sensor = {
+                .name = "温度传感器",
+                .unique_id = "T01",
+                .device_class = Class_temperature,
+            };
+            static ha_sensor_entity_t H_sensor = {
+                .name = "湿度传感器",
+                .unique_id = "H01",
+                .device_class = Class_humidity,
+            };
+            homeAssistant_device_add_entity(CONFIG_HA_ENTITY_SENSOR, &T_sensor);
+            homeAssistant_device_add_entity(CONFIG_HA_ENTITY_SENSOR, &H_sensor);
 
+            homeAssistant_device_send_status(HOMEASSISTANT_STATUS_ONLINE);
             dev_msg.device_state = DEVICE_STATE_HOMEASSISTANT_CONNECT;
 
             // device_state_update(false, &dev_msg);
@@ -34,13 +46,13 @@ void ha_event_cb(ha_event_t event, homeAssisatnt_device_t* dev)
         case HA_EVENT_MQTT_DISCONNECT:
             HA_LOG_I("<<<<<<<<<<  HA_EVENT_MQTT_DISCONNECT\r\n");
             break;
-        case HA_EVENT_MQTT_COMMAND_SWITCH:
-            // homeAssistant_device_send_entity_state(CONFIG_HA_ENTITY_SWITCH, &sw1, dev->entity_switch->command_switch->switch_state);
-            // dev_msg.device_state = DEVICE_STATE_HOMEASSISTANT_SWTICC_STATE;
-            // dev_msg.ha_dev = dev;
-            // device_state_update(false, &dev_msg);
+            // case HA_EVENT_MQTT_COMMAND_SWITCH:
+            //     // homeAssistant_device_send_entity_state(CONFIG_HA_ENTITY_SWITCH, &sw1, dev->entity_switch->command_switch->switch_state);
+            //     // dev_msg.device_state = DEVICE_STATE_HOMEASSISTANT_SWTICC_STATE;
+            //     // dev_msg.ha_dev = dev;
+            //     // device_state_update(false, &dev_msg);
 
-            break;
+            //     break;
         default:
             break;
     }

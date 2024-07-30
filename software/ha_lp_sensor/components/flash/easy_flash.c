@@ -16,7 +16,7 @@
 #include "easy_flash.h"
 #include "device_state.h"
 
-static char* flash_key[] = { "ssid","pass","pmk","band","chan_id","mqtt_host","mqtt_port","mqtt_clientID","mqtt_username","mqtt_password","ha_name","ha_manufacturer","boot_numble" };
+static char* flash_key[] = { "ssid","pass","pmk","band","chan_id","frequency","mqtt_host","mqtt_port","mqtt_clientID","mqtt_username","mqtt_password","ha_name","ha_manufacturer","boot_numble" };
 static char* ac_flash_key[] = { "temp","mode" };
 
 static bool ef_set_bytes(const char* key, char* value, int len) {
@@ -50,6 +50,13 @@ bool flash_save_wifi_info(void* value)
         result = ef_set_bytes(flash_key[FLASH_WIFI_BAND], (char*)&wifi_info->band, sizeof(wifi_info->band));
     if (wifi_info->chan_id)
         result = ef_set_bytes(flash_key[FLASH_WIFI_CHAN_ID], (char*)&wifi_info->chan_id, sizeof(wifi_info->chan_id));
+    if (wifi_info->frequency>0) {
+        char* frequency = pvPortMalloc(8);
+        memset(frequency, 0, 8);
+        sprintf(frequency, "%d", wifi_info->frequency);
+        result = ef_set_bytes(flash_key[FLASH_WIFI_FREQUENCY], frequency, 8);
+        vPortFree(frequency);
+    }
     ef_save_env();
     return result == EF_NO_ERR ? true : false;
 }
@@ -70,7 +77,13 @@ int flash_get_wifi_info(void* value)
     wifi_info->ssid[result] = '\0';
     result = ef_get_bytes(flash_key[FLASH_WIFI_PASSWORD], wifi_info->password, 64);
     wifi_info->password[result] = '\0';
-    result = ef_get_bytes(flash_key[FLASH_WIFI_PMK], wifi_info->pmk, 64);
+    // result = ef_get_bytes(flash_key[FLASH_WIFI_PMK], wifi_info->pmk, 64);
+    char* frequency = pvPortMalloc(8);
+    memset(frequency, 0, 8);
+    result = ef_get_bytes(flash_key[FLASH_WIFI_FREQUENCY], frequency, 8);
+    wifi_info->frequency = atoi(frequency);
+    vPortFree(frequency);
+
     return result;
 
 }

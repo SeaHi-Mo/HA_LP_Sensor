@@ -38,10 +38,10 @@ int main(void)
         //复位数量符合，
         LOG_I("启动配网\r\n");
         flash_save_device_boot_cnt(0);
-        blufi_config_start();
+        // blufi_config_start();
     }
 
-    // device_state_machine_start();
+    device_state_machine_start();
     vTaskStartScheduler();
     while (1) {
 

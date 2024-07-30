@@ -11,13 +11,8 @@
 #include "FreeRTOS.h"
 #include "task.h"
 #include "timers.h"
+#include "string.h"
 
-#include <lwip/tcpip.h>
-#include <lwip/sockets.h>
-#include <lwip/netdb.h>
-#include "export/bl_fw_api.h"
-#include "wifi_mgmr_ext.h"
-#include "wifi_mgmr.h"
 #include "bflb_irq.h"
 #include "bflb_uart.h"
 #include "bflb_l1c.h"
@@ -38,7 +33,7 @@ static int32_t rssi = 0;
 static int32_t state = 0;
 static bool wifi_is_connect;
 int wifi_config_start = false;
-
+static dev_msg_t dev_msg;
 static TaskHandle_t wifi_fw_task;
 
 static wifi_conf_t conf = {
@@ -54,6 +49,8 @@ void wifi_event_handler(uint32_t code)
         } break;
         case CODE_WIFI_ON_MGMR_DONE: {
             LOG_I("[APP] [EVT] %s, CODE_WIFI_ON_MGMR_DONE\r\n", __func__);
+            dev_msg.device_state = DEVICE_STATE_WIFI_START;
+            device_state_machine_update(true, &dev_msg);
         } break;
         case CODE_WIFI_ON_SCAN_DONE: {
             LOG_I("[APP] [EVT] %s, CODE_WIFI_ON_SCAN_DONE\r\n", __func__);
@@ -61,15 +58,26 @@ void wifi_event_handler(uint32_t code)
         } break;
         case CODE_WIFI_ON_CONNECTED: {
             LOG_I("[APP] [EVT] %s, CODE_WIFI_ON_CONNECTED\r\n", __func__);
-            void mm_sec_keydump();
-            mm_sec_keydump();
+            // void mm_sec_keydump();
+            // mm_sec_keydump();
         } break;
         case CODE_WIFI_ON_GOT_IP: {
             LOG_I("[APP] [EVT] %s, CODE_WIFI_ON_GOT_IP\r\n", __func__);
             LOG_I("[SYS] Memory left is %d Bytes\r\n", kfree_size());
+            wifi_mgmr_connect_ind_stat_info_t connect_info;
+            dev_msg.device_state = DEVICE_STATE_WIFI_CONNECT;
+            wifi_mgmr_sta_connect_ind_stat_get(&connect_info);
+            dev_msg.wifi_info.band = connect_info.chan_band;
+            dev_msg.wifi_info.chan_id = connect_info.channel;
+            dev_msg.wifi_info.frequency = 2412+5*13;
+            strcpy(dev_msg.wifi_info.ssid, connect_info.ssid);
+            strcpy(dev_msg.wifi_info.password, connect_info.passphr);
+            device_state_machine_update(true, &dev_msg);
         } break;
         case CODE_WIFI_ON_DISCONNECT: {
             LOG_I("[APP] [EVT] %s, CODE_WIFI_ON_DISCONNECT\r\n", __func__);
+            dev_msg.device_state = DEVICE_STATE_WIFI_DISCONNET;
+            device_state_machine_update(true, &dev_msg);
         } break;
         case CODE_WIFI_ON_AP_STARTED: {
             LOG_I("[APP] [EVT] %s, CODE_WIFI_ON_AP_STARTED\r\n", __func__);
