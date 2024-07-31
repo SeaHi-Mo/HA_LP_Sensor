@@ -19,7 +19,7 @@
 #define SHT30_I2C_SDA GPIO_PIN_10
 #define SHT30_I2C_SCL GPIO_PIN_11
 #define SHT30_CMD_LEN_BYTE                2         /* SHT30芯片指令长度 */
-static struct bflb_device_s* gpio;
+struct bflb_device_s* gpio;
 static struct bflb_device_s* i2c0;
 static struct bflb_i2c_msg_s msgs[2];
 

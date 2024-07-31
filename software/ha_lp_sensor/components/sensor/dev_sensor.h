@@ -12,7 +12,7 @@
 #define DEV_SENSOR_H
 #include "device_state.h"
 #define SENSOR_POWER_EN 1
-
+#define SENSOR_ADC_POWER_EN 12
 typedef enum
 {
     I2C_CMD_SEND_RESU_OK = 0,
@@ -24,4 +24,7 @@ typedef enum
 }i2c_sensor_state_t;
 void sth30_i2c_device_init(void);
 i2c_sensor_state_t sht30_read_Temperature_and_humidity(float* Temperature, uint8_t* humidity);
+
+void batty_adc_device_init(void);
+uint32_t batty_get_residual(void);
 #endif

@@ -23,6 +23,8 @@ static homeAssisatnt_device_t ha_dev;
 static float Temperature;
 static uint8_t humidity;
 static uint8_t bat_value;
+static uint8_t bat_get_value_cnt = 0;
+static uint32_t batt_vol = 0;
 static void device_state_machine(void* arg)
 {
     dev_msg_t* dev_msg = pvPortMalloc(sizeof(dev_msg_t));
@@ -85,6 +87,11 @@ static void device_state_machine(void* arg)
                 ha_sensor_entity_t* temp = homeAssistant_fine_entity(CONFIG_HA_ENTITY_SENSOR, "T01");
                 ha_sensor_entity_t* humi = homeAssistant_fine_entity(CONFIG_HA_ENTITY_SENSOR, "H01");
                 ha_sensor_entity_t* bat = homeAssistant_fine_entity(CONFIG_HA_ENTITY_SENSOR, "bat01");
+
+                //计算电池容量，4.2V ADC读取分压2000mV，LDO需要最低3.4V adc读取分压1946mV。
+                batt_vol /= bat_get_value_cnt;
+                bat_value = (uint8_t)(batt_vol-1870)*100/130;
+                HA_LOG_I("batt_vol=%d bat_value=%d\r\n", batt_vol, bat_value);
                 if (temp!=NULL) {
                     temp->sensor_data = (char*)pvPortMalloc(3);
                     memset(temp->sensor_data, 0, 3);
@@ -115,11 +122,24 @@ static void device_state_machine(void* arg)
 
 }
 
+static void batty_adc_get(void* arg)
+{
+    while (1)
+    {
+        batt_vol += batty_get_residual();
+        vTaskDelay(pdMS_TO_TICKS(100));
+        bat_get_value_cnt++;
+    }
+
+}
+
 void device_state_machine_start(void)
 {
     device_queue_handle = xQueueCreate(2, sizeof(dev_msg_t));
     sth30_i2c_device_init();
+    batty_adc_device_init();
     xTaskCreate(device_state_machine, "state_machine", 1024, NULL, 2, &state_machine_handle);
+    xTaskCreate(batty_adc_get, "adc_get", 1024, NULL, 3, NULL);
     static dev_msg_t dev_msg = {
          .device_state = DEVICE_STATE_SYSTEM_START,
     };
