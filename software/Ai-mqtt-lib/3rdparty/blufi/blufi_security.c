@@ -122,7 +122,7 @@ void blufi_dh_negotiate_data_handler(uint8_t* data, int len, uint8_t** output_da
 
     if (blufi_sec == NULL)
     {
-        blog_info("BLUFI Security is not initialized ");
+        printf("BLUFI Security is not initialized \r\n");
         btc_blufi_report_error(_BLUFI_INIT_SECURITY_ERROR); //
         return;
     }
@@ -140,7 +140,7 @@ void blufi_dh_negotiate_data_handler(uint8_t* data, int len, uint8_t** output_da
             if (blufi_sec->dh_param == NULL)
             {
                 btc_blufi_report_error(_BLUFI_DH_MALLOC_ERROR);
-                blog_info("%s, malloc failed \r\n", __func__);
+                printf("%s, malloc failed \r\n", __func__);
                 return;
             }
             break;
@@ -148,7 +148,7 @@ void blufi_dh_negotiate_data_handler(uint8_t* data, int len, uint8_t** output_da
         {
             if (blufi_sec->dh_param == NULL)
             {
-                blog_info("%s, blufi_sec->dh_param == NULL\r\n", __func__);
+                printf("%s, blufi_sec->dh_param == NULL\r\n", __func__);
                 btc_blufi_report_error(_BLUFI_DH_PARAM_ERROR);
                 return;
             }
@@ -157,7 +157,7 @@ void blufi_dh_negotiate_data_handler(uint8_t* data, int len, uint8_t** output_da
             ret = mbedtls_dhm_read_params(&blufi_sec->dhm, &param, &param[blufi_sec->dh_param_len]);
             if (ret)
             {
-                blog_info("%s read param failed %d\r\n", __func__, ret);
+                printf("%s read param failed %d\r\n", __func__, ret);
                 btc_blufi_report_error(_BLUFI_READ_PARAM_ERROR);
                 return;
             }
@@ -166,7 +166,7 @@ void blufi_dh_negotiate_data_handler(uint8_t* data, int len, uint8_t** output_da
             ret = mbedtls_dhm_make_public(&blufi_sec->dhm, (int)mbedtls_mpi_size(&blufi_sec->dhm.P), blufi_sec->self_public_key, blufi_sec->dhm.len, myrand, NULL);
             if (ret)
             {
-                blog_info("%s make public failed %d\r\n", __func__, ret);
+                printf("%s make public failed %d\r\n", __func__, ret);
                 btc_blufi_report_error(_BLUFI_MAKE_PUBLIC_ERROR);
                 return;
             }
@@ -208,7 +208,7 @@ int blufi_aes_encrypt(uint8_t iv8, uint8_t* crypt_data, int crypt_len)
     ret = mbedtls_aes_crypt_cfb128(&blufi_sec->aes, MBEDTLS_AES_ENCRYPT, crypt_len, &iv_offset, iv0, crypt_data, crypt_data);
     if (ret)
     {
-        blog_info("%s mbedtls_aes_crypt_cfb128 failed %d\r\n", __func__, ret);
+        printf("%s mbedtls_aes_crypt_cfb128 failed %d\r\n", __func__, ret);
         return -1;
     }
 

@@ -62,7 +62,7 @@ static void _connected(struct bt_conn* conn, u8_t err)
     g_blufi_conn = conn;
     axk_ble_blufi_gap_connect_export(&conn_handle, &peer_addr);
 
-    LOG_F("[BLE] connected \r\n");
+    printf("[BLE] connected \r\n");
 
     return;
 }
@@ -93,13 +93,13 @@ static void _disconnected(struct bt_conn* conn, u8_t reason)
     g_blufi_conn = NULL;
     axk_ble_blufi_gap_disconnect_export(&peer_addr);
 
-    LOG_W("[BLE] disconnected, reason:%d", reason);
+    printf("[BLE] disconnected, reason:%d\r\n", reason);
 }
 
 static bool _le_param_req(struct bt_conn* conn,
                           struct bt_le_conn_param* param)
 {
-    LOG_F("[BLE] conn param request: int 0x%04x-0x%04x lat %d to %d",
+    printf("[BLE] conn param request: int 0x%04x-0x%04x lat %d to %d\r\n",
            param->interval_min,
            param->interval_max,
            param->latency,
@@ -116,12 +116,12 @@ static void _le_param_updated(struct bt_conn* conn, u16_t interval,
     conn_handle.type = AT_POINT_HANDLE;
     conn_handle.p_handle = (void*)conn;
 
-    LOG_F("[BLE] conn param updated: int 0x%04x lat %d to %d ", interval, latency, timeout);
+    printf("[BLE] conn param updated: int 0x%04x lat %d to %d \r\n", interval, latency, timeout);
 }
 
 static void _le_phy_updated(struct bt_conn* conn, u8_t tx_phy, u8_t rx_phy)
 {
-    LOG_F("[BLE] phy updated: rx_phy %d, rx_phy %d ", tx_phy, rx_phy);
+    printf("[BLE] phy updated: rx_phy %d, rx_phy %d \r\n", tx_phy, rx_phy);
 }
 
 static void _ble_mtu_changed_cb(struct bt_conn* conn, int mtu)
@@ -135,7 +135,7 @@ static void _ble_mtu_changed_cb(struct bt_conn* conn, int mtu)
 
     axk_ble_blufi_gap_mtu_change_export(mtu);
 
-    LOG_I("[BLE] mtu updated:%d", mtu);
+    printf("[BLE] mtu updated:%d\r\n", mtu);
 }
 
 static struct bt_conn_cb conn_callbacks = {
@@ -150,7 +150,7 @@ static void ble_disconnect_all(struct bt_conn* conn, void* data)
 {
     if (conn->state == BT_CONN_CONNECTED)
     {
-        LOG_W("[BLE] disconn id:%d", conn->id);
+        printf("[BLE] disconn id:%d\r\n", conn->id);
         bt_conn_disconnect(conn, BT_HCI_ERR_REMOTE_USER_TERM_CONN);
     }
 }
@@ -186,7 +186,7 @@ int axk_hal_ble_role_set(ble_role_t role)
         /* wait for all connection to be disconnected */
         int disconn_cnt = 0;
         while (le_check_valid_conn() && disconn_cnt++ < 10) {
-            LOG_F("[BLE] wait for ble_disconnect_all");
+            printf("[BLE] wait for ble_disconnect_all\r\n");
             vTaskDelay(pdMS_TO_TICKS(500));
         }
 

@@ -11,7 +11,8 @@
 // #include <bl_wifi.h>
 // #include <hal_wifi.h>
 #include <wifi_mgmr_ext.h>
-#include <export/bl_fw_api.h>
+// #include <export/bl_fw_api.h>
+#include <bl_fw_api.h>
 // #include <aos/yloop.h>
 // #include <aos/kernel.h>
 

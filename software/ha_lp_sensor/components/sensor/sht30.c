@@ -188,6 +188,6 @@ i2c_sensor_state_t sht30_read_Temperature_and_humidity(float* Temperature, uint8
 
     Temp = (RecData[3] << 8) | RecData[4];
     *humidity = (Temp * 100) / 65535;
-
+    bflb_gpio_set(gpio, SENSOR_POWER_EN);
     return I2C_READ_OK;
 }

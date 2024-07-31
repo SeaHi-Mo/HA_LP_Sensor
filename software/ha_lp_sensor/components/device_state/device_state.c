@@ -15,6 +15,7 @@
 #include "device_state.h"
 
 #define DBG_TAG "DEVICE_STATE"
+#define BOOT_CNT_MAX 4
 
 static QueueHandle_t device_queue_handle;
 static TaskHandle_t state_machine_handle;
@@ -29,6 +30,9 @@ static void device_state_machine(void* arg)
 {
     dev_msg_t* dev_msg = pvPortMalloc(sizeof(dev_msg_t));
     dev_msg->ha_dev = &ha_dev;
+    int boot_cnt = 0;
+
+    //识别是否够配网数量
     while (1)
     {
         xQueueReceive(device_queue_handle, dev_msg, portMAX_DELAY);
@@ -36,16 +40,19 @@ static void device_state_machine(void* arg)
             case DEVICE_STATE_SYSTEM_START:
             {
                 HA_LOG_I("DEVICE_STATE_SYSTEM_START\r\n");
-
-                //读取HA 连接信息
-                if (flash_get_mqtt_info(&ha_dev.mqtt_info)) {
-                    if (flash_get_ha_device_msg(&ha_dev)) {
-                        // if (!blufi_is_start)
-                        ha_dev.mqtt_info.mqtt_host = "wx.ai-thinker.com";
-                        ha_dev.mqtt_info.port = 1883;
-                        device_homeAssistant_init(&ha_dev);
-                        // flash_save_device_boot_cnt(0);
-                    }
+                boot_cnt = flash_get_device_boot_cnt();
+                if (boot_cnt<BOOT_CNT_MAX) {
+                    LOG_F("复位次数=%d\r\n", boot_cnt);
+                    boot_cnt++;
+                    flash_save_device_boot_cnt(boot_cnt);
+                }
+                else {
+                    //复位数量符合，
+                    LOG_I("启动配网\r\n");
+                    flash_save_device_boot_cnt(0);
+                    blufi_config_start();
+                    // blufi_start();
+                    blufi_is_start = true;
                 }
                 sht30_read_Temperature_and_humidity(&Temperature, &humidity);
 
@@ -57,22 +64,31 @@ static void device_state_machine(void* arg)
                 //读取WiFi 信息
                 int ret = flash_get_wifi_info(&dev_msg->wifi_info);
                 if (strlen(dev_msg->wifi_info.ssid)==0) {
-                    memset(dev_msg->wifi_info.ssid, 0, 64);
-                    memset(dev_msg->wifi_info.password, 0, 64);
-                    sprintf(dev_msg->wifi_info.ssid, "AIOT@FAE");
-                    sprintf(dev_msg->wifi_info.password, "fae12345678");
+                    blufi_config_start();
                 }
                 else {
                     HA_LOG_I("ssid=%s passs=%s  f=%d\r\n", dev_msg->wifi_info.ssid, dev_msg->wifi_info.password, dev_msg->wifi_info.frequency);
                 }
-                wifi_mgmr_sta_quickconnect(dev_msg->wifi_info.ssid, dev_msg->wifi_info.password, 0, (2412+5*13));
+                if (!blufi_is_start)
+                    wifi_mgmr_sta_quickconnect(dev_msg->wifi_info.ssid, dev_msg->wifi_info.password, 0, (2412+5*13));
             }
             break;
             case DEVICE_STATE_WIFI_CONNECT:
             {
                 HA_LOG_I("DEVICE_STATE_WIFI_CONNECT\r\n");
+                if (ble_is_connected) {
+                    LOG_D(">>>>>>>>>>>>>>>>>>> mark 1\r\n");
+                    blufi_wifi_evt_export(BLUFI_STATION_GOT_IP);
+                }
+                //读取HA 连接信息
+                if (flash_get_mqtt_info(&ha_dev.mqtt_info)) {
+                    if (flash_get_ha_device_msg(&ha_dev)) {
+                        device_homeAssistant_init(&ha_dev);
+                    }
+                }
                 flash_save_wifi_info(&dev_msg->wifi_info);
                 homeAssistant_device_start();
+                flash_save_device_boot_cnt(0);
             }
             break;
             case DEVICE_STATE_WIFI_DISCONNET:
@@ -115,6 +131,13 @@ static void device_state_machine(void* arg)
                 pm_hbn_mode_enter(PM_HBN_LEVEL_0, 32768*60*60);
             }
             break;
+            case DEVICE_STATE_HOMEASSISTANT_DISCONNECT:
+            {
+                HA_LOG_I("DEVICE_STATE_HOMEASSISTANT_DISCONNECT\r\n");
+                flash_save_device_boot_cnt(4);
+                GLB_SW_System_Reset();
+            }
+            break;
             default:
                 break;
         }
@@ -124,6 +147,8 @@ static void device_state_machine(void* arg)
 
 static void batty_adc_get(void* arg)
 {
+
+
     while (1)
     {
         batt_vol += batty_get_residual();
@@ -138,8 +163,9 @@ void device_state_machine_start(void)
     device_queue_handle = xQueueCreate(2, sizeof(dev_msg_t));
     sth30_i2c_device_init();
     batty_adc_device_init();
-    xTaskCreate(device_state_machine, "state_machine", 1024, NULL, 2, &state_machine_handle);
     xTaskCreate(batty_adc_get, "adc_get", 1024, NULL, 3, NULL);
+    xTaskCreate(device_state_machine, "state_machine", 1024, NULL, 2, &state_machine_handle);
+
     static dev_msg_t dev_msg = {
          .device_state = DEVICE_STATE_SYSTEM_START,
     };

@@ -22,7 +22,7 @@ aux_source_directory(../Ai-mqtt-lib/protocol SRC_FILES)
 aux_source_directory(../Ai-mqtt-lib/system SRC_FILES)
 aux_source_directory(../Ai-mqtt-lib/utils SRC_FILES)
 
-aux_source_directory(../Ai-mqtt-lib/application SRC_FILES)
+# aux_source_directory(../Ai-mqtt-lib/application SRC_FILES)
 aux_source_directory(../Ai-mqtt-lib/3rdparty/http-parser/src SRC_FILES)
 aux_source_directory(../Ai-mqtt-lib/3rdparty/aiio/tcp_transport SRC_FILES)
 aux_source_directory(../Ai-mqtt-lib/3rdparty/aiio/tcp_transport SRC_FILES)
@@ -39,7 +39,7 @@ sdk_add_include_directories(../Ai-mqtt-lib/protocol)
 sdk_add_include_directories(../Ai-mqtt-lib/system)
 sdk_add_include_directories(../Ai-mqtt-lib/utils)
 
-sdk_add_include_directories(../Ai-mqtt-lib/application)
+# sdk_add_include_directories(../Ai-mqtt-lib/application)
 sdk_add_include_directories(../Ai-mqtt-lib/3rdparty/http-parser/include)
 sdk_add_include_directories(../Ai-mqtt-lib/3rdparty/aiio/tcp_transport/include)
 sdk_add_include_directories(../Ai-mqtt-lib/3rdparty/aiio/tcp_transport/private_include)
@@ -48,13 +48,12 @@ sdk_add_include_directories(../Ai-mqtt-lib/3rdparty/aiio/aiio_tls/aiio-tls-crypt
 
 sdk_add_include_directories(../Ai-mqtt-lib/3rdparty/aiio)
 
-sdk_add_include_directories(../Ai-mqtt-lib/3rdparty/aiio/aiio_http_client/include)
-sdk_add_include_directories(../Ai-mqtt-lib/3rdparty/aiio/aiio_http_client/lib/include)
-sdk_add_include_directories(../Ai-mqtt-lib/3rdparty/aiio/aiio_http_server/include)
-sdk_add_include_directories(../Ai-mqtt-lib/3rdparty/aiio/aiio_http_server/src/port)
+# sdk_add_include_directories(../Ai-mqtt-lib/3rdparty/aiio/aiio_http_client/include)
+# sdk_add_include_directories(../Ai-mqtt-lib/3rdparty/aiio/aiio_http_client/lib/include)
+# sdk_add_include_directories(../Ai-mqtt-lib/3rdparty/aiio/aiio_http_server/include)
+# sdk_add_include_directories(../Ai-mqtt-lib/3rdparty/aiio/aiio_http_server/src/port)
 sdk_add_include_directories(../Ai-mqtt-lib/3rdparty/aiio/mqtt/aiio_mqtt/lib/include)
 sdk_add_include_directories(../Ai-mqtt-lib/3rdparty/aiio/mqtt/aiio_mqtt/include)
-
 sdk_add_include_directories(./../Ai-mqtt-lib/3rdparty/blufi)
 
 # 添加HomeAssistant 库

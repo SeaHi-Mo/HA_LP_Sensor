@@ -1,14 +1,14 @@
 SDK_DEMO_PATH ?= .
-BL_SDK_BASE ?= $(SDK_DEMO_PATH)/../../os/
+BL_SDK_BASE ?= $(SDK_DEMO_PATH)/../../os_copy/
 
 export BL_SDK_BASE
 
 NOW_REAL_PATH:= $(realpath ./)
 BOARD_DIR = ${NOW_REAL_PATH}
-BOARD ?= config_2M_board
+BOARD ?= bl616dk
 
 CHIP ?= bl616
-
+# BOARD ?= bl616dk
 CROSS_COMPILE ?=$(PWD)/../../toolchain/bin/riscv64-unknown-elf-
 
 

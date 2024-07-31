@@ -36,6 +36,8 @@ int wifi_config_start = false;
 static dev_msg_t dev_msg;
 static TaskHandle_t wifi_fw_task;
 
+
+
 static wifi_conf_t conf = {
     .country_code = "CN",
 };
@@ -58,13 +60,18 @@ void wifi_event_handler(uint32_t code)
         } break;
         case CODE_WIFI_ON_CONNECTED: {
             LOG_I("[APP] [EVT] %s, CODE_WIFI_ON_CONNECTED\r\n", __func__);
+            if (ble_is_connected) {
+
+                blufi_wifi_evt_export(BLUFI_STATION_CONNECTED);
+            }
             // void mm_sec_keydump();
             // mm_sec_keydump();
         } break;
         case CODE_WIFI_ON_GOT_IP: {
             LOG_I("[APP] [EVT] %s, CODE_WIFI_ON_GOT_IP\r\n", __func__);
-            LOG_I("[SYS] Memory left is %d Bytes\r\n", kfree_size());
+
             wifi_mgmr_connect_ind_stat_info_t connect_info;
+
             dev_msg.device_state = DEVICE_STATE_WIFI_CONNECT;
             wifi_mgmr_sta_connect_ind_stat_get(&connect_info);
             dev_msg.wifi_info.band = connect_info.chan_band;
@@ -73,6 +80,8 @@ void wifi_event_handler(uint32_t code)
             strcpy(dev_msg.wifi_info.ssid, connect_info.ssid);
             strcpy(dev_msg.wifi_info.password, connect_info.passphr);
             device_state_machine_update(true, &dev_msg);
+
+
         } break;
         case CODE_WIFI_ON_DISCONNECT: {
             LOG_I("[APP] [EVT] %s, CODE_WIFI_ON_DISCONNECT\r\n", __func__);
@@ -120,6 +129,7 @@ void staWiFiInit(void)
     xTaskCreate(wifi_main, (char*)"fw", WIFI_STACK_SIZE, NULL, TASK_PRIORITY_FW, &wifi_fw_task);
 
     wifi_is_connect = false;
+
 }
 /**
  * @brief staWiFiConnect

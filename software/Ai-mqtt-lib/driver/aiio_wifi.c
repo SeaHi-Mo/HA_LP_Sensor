@@ -10,6 +10,7 @@
  *  </table>
  *
  */
+
 #include "FreeRTOS.h"
 #include "task.h"
 #include "timers.h"
@@ -19,7 +20,8 @@
 #include <lwip/sockets.h>
 #include <lwip/netdb.h>
 
-#include "export/bl_fw_api.h"
+ // #include "export/bl_fw_api.h"
+#include "bl_fw_api.h"
 #include "wifi_mgmr_ext.h"
 #include "wifi_mgmr.h"
 
@@ -59,96 +61,97 @@
 /// 5G lower bound freq
 #define PHY_FREQ_5G 5000
 
-// enum mac_chan_band
-// {
-//     /// 2.4GHz Band
-//     PHY_BAND_2G4,
-//     /// 5GHz band
-//     PHY_BAND_5G,
-//     /// Number of bands
-//     PHY_BAND_MAX,
-// };
-// enum mac_chan_bandwidth
-// {
-//     /// 20MHz BW
-//     PHY_CHNL_BW_20,
-//     /// 40MHz BW
-//     PHY_CHNL_BW_40,
-//     /// 80MHz BW
-//     PHY_CHNL_BW_80,
-//     /// 160MHz BW
-//     PHY_CHNL_BW_160,
-//     /// 80+80MHz BW
-//     PHY_CHNL_BW_80P80,
-//     /// Reserved BW
-//     PHY_CHNL_BW_OTHER,
-// };
+# if 1
+enum mac_chan_band
+{
+    /// 2.4GHz Band
+    PHY_BAND_2G4,
+    /// 5GHz band
+    PHY_BAND_5G,
+    /// Number of bands
+    PHY_BAND_MAX,
+};
+enum mac_chan_bandwidth
+{
+    /// 20MHz BW
+    PHY_CHNL_BW_20,
+    /// 40MHz BW
+    PHY_CHNL_BW_40,
+    /// 80MHz BW
+    PHY_CHNL_BW_80,
+    /// 160MHz BW
+    PHY_CHNL_BW_160,
+    /// 80+80MHz BW
+    PHY_CHNL_BW_80P80,
+    /// Reserved BW
+    PHY_CHNL_BW_OTHER,
+};
 
-// struct mac_chan_op
-// {
-//     /// Band (@ref mac_chan_band)
-//     uint8_t band;
-//     /// Channel type (@ref mac_chan_bandwidth)
-//     uint8_t type;
-//     /// Frequency for Primary 20MHz channel (in MHz)
-//     uint16_t prim20_freq;
-//     /// Frequency center of the contiguous channel or center of Primary 80+80 (in MHz)
-//     uint16_t center1_freq;
-//     /// Frequency center of the non-contiguous secondary 80+80 (in MHz)
-//     uint16_t center2_freq;
-//     /// Max transmit power allowed on this channel (dBm)
-//     int8_t tx_power;
-//     /// Additional information (@ref mac_chan_flags)
-//     uint8_t flags;
-// };
+struct mac_chan_op
+{
+    /// Band (@ref mac_chan_band)
+    uint8_t band;
+    /// Channel type (@ref mac_chan_bandwidth)
+    uint8_t type;
+    /// Frequency for Primary 20MHz channel (in MHz)
+    uint16_t prim20_freq;
+    /// Frequency center of the contiguous channel or center of Primary 80+80 (in MHz)
+    uint16_t center1_freq;
+    /// Frequency center of the non-contiguous secondary 80+80 (in MHz)
+    uint16_t center2_freq;
+    /// Max transmit power allowed on this channel (dBm)
+    int8_t tx_power;
+    /// Additional information (@ref mac_chan_flags)
+    uint8_t flags;
+};
 
-// enum
-// {
-//     /// Primary radar detection chain (i.e for the operating channel)
-//     PHY_PRIM,
-//     /// Secondary radar detection chain
-//     PHY_SEC,
-// };
+enum
+{
+    /// Primary radar detection chain (i.e for the operating channel)
+    PHY_PRIM,
+    /// Secondary radar detection chain
+    PHY_SEC,
+};
 
-// struct mac_addr
-// {
-//     /// Array of 16-bit words that make up the MAC address.
-//     uint16_t array[MAC_ADDR_LEN/2];
-// };
+struct mac_addr
+{
+    /// Array of 16-bit words that make up the MAC address.
+    uint16_t array[MAC_ADDR_LEN/2];
+};
 
-// struct mac_hdr
-// {
-//     /// Frame control
-//     uint16_t fctl;
-//     /// Duration/ID
-//     uint16_t durid;
-//     /// Address 1
-//     struct mac_addr addr1;
-//     /// Address 2
-//     struct mac_addr addr2;
-//     /// Address 3
-//     struct mac_addr addr3;
-//     /// Sequence control
-//     uint16_t seq;
-// } __PACKED;
+struct mac_hdr
+{
+    /// Frame control
+    uint16_t fctl;
+    /// Duration/ID
+    uint16_t durid;
+    /// Address 1
+    struct mac_addr addr1;
+    /// Address 2
+    struct mac_addr addr2;
+    /// Address 3
+    struct mac_addr addr3;
+    /// Sequence control
+    uint16_t seq;
+} __PACKED;
 
-// uint16_t phy_channel_to_freq(uint8_t band, int channel)
-// {
-//     if ((band == PHY_BAND_2G4) && (channel >= 1) && (channel <= 14))
-//     {
-//         if (channel == 14)
-//             return 2484;
-//         else
-//             return 2407 + channel * 5;
-//     }
-//     else if ((band == PHY_BAND_5G) && (channel >= 1) && (channel <= 177))
-//     {
-//         return PHY_FREQ_5G + channel * 5;
-//     }
+uint16_t phy_channel_to_freq(uint8_t band, int channel)
+{
+    if ((band == PHY_BAND_2G4) && (channel >= 1) && (channel <= 14))
+    {
+        if (channel == 14)
+            return 2484;
+        else
+            return 2407 + channel * 5;
+    }
+    else if ((band == PHY_BAND_5G) && (channel >= 1) && (channel <= 177))
+    {
+        return PHY_FREQ_5G + channel * 5;
+    }
 
-//     return 0;
-// }
-
+    return 0;
+}
+#endif
 //////////
 
 static aiio_wifi_conf_t aiio_conf =

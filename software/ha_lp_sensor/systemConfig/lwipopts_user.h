@@ -31,7 +31,6 @@
  */
 #ifndef LWIP_HDR_LWIPOPTS_H__
 #define LWIP_HDR_LWIPOPTS_H__
-
 #define CONFIG_MAC_TXQ_DEPTH 16
 #define CONFIG_MAC_RXQ_DEPTH 12
  // #define LWIP_NUM_NETIF_CLIENT_DATA              1

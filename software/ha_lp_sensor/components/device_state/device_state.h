@@ -19,7 +19,8 @@
 #include <lwip/tcpip.h>
 #include <lwip/sockets.h>
 #include <lwip/netdb.h>
-#include "export/bl_fw_api.h"
+// #include "export/bl_fw_api.h"
+#include "bl_fw_api.h"
 #include "wifi_mgmr_ext.h"
 #include "wifi_mgmr.h"
 
@@ -55,6 +56,7 @@ typedef enum {
     DEVICE_STATE_BLUFI_DONE,
     /* 自定义状态 */
     DEVICE_STATE_HOMEASSISTANT_CONNECT,
+    DEVICE_STATE_HOMEASSISTANT_DISCONNECT,
     DEVICE_STATE_HOMEASSISTANT_DATA,
     DEVICE_STATE_HOMEASSISTANT_UPDATE_VALUE,
 }dev_state_t;

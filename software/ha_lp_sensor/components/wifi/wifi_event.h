@@ -11,6 +11,8 @@
 #ifndef WIFI_EVENT_H
 #define WIFI_EVENT_H
 
+extern bool blufi_is_start;
+extern bool ble_is_connected;
 void staWiFiInit(void);
 
 void staWiFiConnect(const char* ssid, const char* passworld);
@@ -19,5 +21,5 @@ void staWiFiDisconnect(void);
 void blufi_config_start(void);
 void wifi_device_stop(void);
 
-void blufi_wifi_event(int event, void* param);
+// void blufi_wifi_event(int event, void* param);
 #endif

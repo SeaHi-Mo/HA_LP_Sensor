@@ -50,10 +50,14 @@ void ha_event_cb(ha_event_t event, homeAssisatnt_device_t* dev)
             dev_msg.device_state = DEVICE_STATE_HOMEASSISTANT_CONNECT;
             // homeAssistant_device_send_entity_state(CONFIG_HA_ENTITY_SENSOR, &BAT_sensor, 100);
             device_state_machine_update(false, &dev_msg);
+
             break;
             /*  服务器断开事件  */
         case HA_EVENT_MQTT_DISCONNECT:
             HA_LOG_I("<<<<<<<<<<  HA_EVENT_MQTT_DISCONNECT\r\n");
+            dev_msg.device_state = DEVICE_STATE_HOMEASSISTANT_DISCONNECT;
+            // homeAssistant_device_send_entity_state(CONFIG_HA_ENTITY_SENSOR, &BAT_sensor, 100);
+            device_state_machine_update(false, &dev_msg);
             break;
             // case HA_EVENT_MQTT_COMMAND_SWITCH:
             //     // homeAssistant_device_send_entity_state(CONFIG_HA_ENTITY_SWITCH, &sw1, dev->entity_switch->command_switch->switch_state);
