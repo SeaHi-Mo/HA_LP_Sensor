@@ -1,5 +1,5 @@
 SDK_DEMO_PATH ?= .
-BL_SDK_BASE ?= $(SDK_DEMO_PATH)/../../os_copy/
+BL_SDK_BASE ?= $(SDK_DEMO_PATH)/../../m62-sdk/
 
 export BL_SDK_BASE
 

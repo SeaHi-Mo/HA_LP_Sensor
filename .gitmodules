@@ -1,6 +1,3 @@
-[submodule "os"]
-	path = os
-	url = https://e.coding.net/axk/c-hi-obj/bouffalo_sdk.git
 [submodule "toolchain"]
 	path = toolchain
 	url = https://gitee.com/bouffalolab/toolchain_gcc_t-head_linux.git
@@ -8,3 +5,6 @@
 	path = software/HomeAssistant-lib
 	url = https://gitee.com/Ai-Thinker-Open/Ai-M6x_HomeAssistant-C.git
 
+[submodule "m62-sdk"]
+	path = m62-sdk
+	url = https://e.coding.net/axk/kaiyuanyingjian/bouffalo_sdk.git
