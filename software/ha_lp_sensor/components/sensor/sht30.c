@@ -99,18 +99,17 @@ uint8_t SHT30CMDSendData[SHT30_CMD_LAST][SHT30_CMD_LEN_BYTE] =
 static void __sht30_i2c_gpio_init(void)
 {
 
-
     gpio = bflb_device_get_by_name("gpio");
     /* I2C0_SDA */
     bflb_gpio_init(gpio, SHT30_I2C_SDA, GPIO_FUNC_I2C0 | GPIO_ALTERNATE | GPIO_PULLUP | GPIO_SMT_EN | GPIO_DRV_1);
     /* I2C0_SCL */
     bflb_gpio_init(gpio, SHT30_I2C_SCL, GPIO_FUNC_I2C0 | GPIO_ALTERNATE | GPIO_PULLUP | GPIO_SMT_EN | GPIO_DRV_1);
     //传感器电源使能脚
-    bflb_gpio_init(gpio, SENSOR_POWER_EN, GPIO_OUTPUT | GPIO_INPUT | GPIO_PULLUP | GPIO_SMT_EN | GPIO_DRV_0);
-
+    bflb_gpio_init(gpio, SENSOR_POWER_EN, GPIO_OUTPUT | GPIO_PULLUP | GPIO_SMT_EN | GPIO_DRV_0);
+    // bflb_gpio_init(gpio, SENSOR_ADC_POWER_EN, GPIO_OUTPUT | GPIO_INPUT | GPIO_PULLUP | GPIO_SMT_EN | GPIO_DRV_0);
 }
 
-void sth30_i2c_device_init(void)
+void sht30_i2c_device_init(void)
 {
     __sht30_i2c_gpio_init();
     bflb_gpio_reset(gpio, SENSOR_POWER_EN);
@@ -119,7 +118,13 @@ void sth30_i2c_device_init(void)
     bflb_i2c_init(i2c0, 400000);
 }
 
-static void sh30_i2c_send_cmd(uint8_t _cmd, uint8_t* sendbuf, uint16_t _length)
+void sht30_i2c_device_deinit(void)
+{
+    bflb_gpio_set(gpio, SENSOR_POWER_EN);
+    bflb_i2c_deinit(i2c0);
+}
+
+static void sht30_i2c_send_cmd(uint8_t _cmd, uint8_t* sendbuf, uint16_t _length)
 {
 
     msgs[0].addr = SHT30_ADDR;
@@ -161,7 +166,7 @@ static i2c_sensor_state_t sht30_set_detection_mode(SHT30CMD _Cmd)
     {
         return I2C_CMD_SEND_RESU_ERR;
     }
-    sh30_i2c_send_cmd(SHT30CMDSendData[_Cmd][0], &SHT30CMDSendData[_Cmd][1], SHT30_CMD_LEN_BYTE - 1);
+    sht30_i2c_send_cmd(SHT30CMDSendData[_Cmd][0], &SHT30CMDSendData[_Cmd][1], SHT30_CMD_LEN_BYTE - 1);
 
     //printf("Chip Test Mode CMD send over\r\n");
     return I2C_CMD_SEND_RESU_OK;
@@ -191,3 +196,4 @@ i2c_sensor_state_t sht30_read_Temperature_and_humidity(float* Temperature, uint8
     bflb_gpio_set(gpio, SENSOR_POWER_EN);
     return I2C_READ_OK;
 }
+

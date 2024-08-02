@@ -19,6 +19,7 @@
 
 static QueueHandle_t device_queue_handle;
 static TaskHandle_t state_machine_handle;
+static TaskHandle_t adc_task_handle;
 static homeAssisatnt_device_t ha_dev;
 
 static float Temperature;
@@ -105,8 +106,10 @@ static void device_state_machine(void* arg)
                 ha_sensor_entity_t* bat = homeAssistant_fine_entity(CONFIG_HA_ENTITY_SENSOR, "bat01");
 
                 //计算电池容量，4.2V ADC读取分压2000mV，LDO需要最低3.4V adc读取分压1946mV。
+                vTaskDelete(adc_task_handle);
                 batt_vol /= bat_get_value_cnt;
                 bat_value = (uint8_t)(batt_vol-1870)*100/130;
+
                 HA_LOG_I("batt_vol=%d bat_value=%d\r\n", batt_vol, bat_value);
                 if (temp!=NULL) {
                     temp->sensor_data = (char*)pvPortMalloc(3);
@@ -124,6 +127,8 @@ static void device_state_machine(void* arg)
                     sprintf(bat->sensor_data, "%d", bat_value);
                 }
 
+                batty_adc_device_deinit();
+                sht30_i2c_device_deinit();
                 homeAssistant_device_send_entity_state(CONFIG_HA_ENTITY_SENSOR, temp, 1);
                 homeAssistant_device_send_entity_state(CONFIG_HA_ENTITY_SENSOR, humi, 1);
                 homeAssistant_device_send_entity_state(CONFIG_HA_ENTITY_SENSOR, bat, 1);
@@ -161,9 +166,9 @@ static void batty_adc_get(void* arg)
 void device_state_machine_start(void)
 {
     device_queue_handle = xQueueCreate(2, sizeof(dev_msg_t));
-    sth30_i2c_device_init();
+    sht30_i2c_device_init();
     batty_adc_device_init();
-    xTaskCreate(batty_adc_get, "adc_get", 1024, NULL, 3, NULL);
+    xTaskCreate(batty_adc_get, "adc_get", 1024, NULL, 3, &adc_task_handle);
     xTaskCreate(device_state_machine, "state_machine", 1024, NULL, 2, &state_machine_handle);
 
     static dev_msg_t dev_msg = {

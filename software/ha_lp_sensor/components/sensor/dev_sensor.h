@@ -22,9 +22,12 @@ typedef enum
     I2C_READ_ERR,
     I2C_READ_LAST,
 }i2c_sensor_state_t;
-void sth30_i2c_device_init(void);
+void sht30_i2c_device_init(void);
+void sht30_i2c_device_deinit(void);
 i2c_sensor_state_t sht30_read_Temperature_and_humidity(float* Temperature, uint8_t* humidity);
 
 void batty_adc_device_init(void);
 uint32_t batty_get_residual(void);
+void batty_adc_device_deinit(void);
+
 #endif

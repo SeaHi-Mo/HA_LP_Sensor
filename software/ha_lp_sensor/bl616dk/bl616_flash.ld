@@ -31,8 +31,8 @@ __RFTLV_HEAD1_L = (0x41524150); /* PAPA */
 MEMORY
 {
     fw_header_memory  (rx)  : ORIGIN = 0xA0000000 - 0x1000, LENGTH = 4K
-    xip_memory  (rx)  : ORIGIN = 0xA0000000, LENGTH = 4M
-    ram_psram  (wxa)   : ORIGIN = 0xA8000000, LENGTH = 4M
+    xip_memory  (rx)  : ORIGIN = 0xA0000000, LENGTH = 2M
+    ram_psram  (wxa)   : ORIGIN = 0xA8000000, LENGTH = 2M
     itcm_memory (rx)  : ORIGIN = 0x62FC0000, LENGTH = 12K
     dtcm_memory (rx)  : ORIGIN = 0x62FC3000, LENGTH = 4K
     nocache_ram_memory (!rx) : ORIGIN = 0x22FC4000, LENGTH = nocache_max_size

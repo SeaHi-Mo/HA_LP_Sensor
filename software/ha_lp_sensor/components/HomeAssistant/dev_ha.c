@@ -102,7 +102,7 @@ void device_homeAssistant_init(homeAssisatnt_device_t* dev_ha)
     }
     if (dev_ha->mqtt_info.mqtt_username==NULL) dev_ha->mqtt_info.mqtt_username = dev_ha->name;
     if (dev_ha->mqtt_info.mqtt_password==NULL)dev_ha->mqtt_info.mqtt_password = "12345678";
-
+    dev_ha->mqtt_info.will.will_msg = "online";//修改发送遗嘱信息，可以让HA显示可用状态
     dev_ha->mqtt_info.mqtt_keeplive = 60*60;//一个小时的心跳
     HA_LOG_I("------------------mqtt msg----------------------\r\n");
     HA_LOG_I("mqtt host:%s\r\n", dev_ha->mqtt_info.mqtt_host);

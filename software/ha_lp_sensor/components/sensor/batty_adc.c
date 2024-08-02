@@ -22,16 +22,15 @@ static struct bflb_device_s* gpio;
 static struct bflb_device_s* adc;
 static volatile uint32_t raw_data;
 static bool adc_irq_flg = false;
-//接收AD值变量
+
 static void _batty_adc_gpio_init(void)
 {
     gpio = bflb_device_get_by_name("gpio");
     //传感器电源使能脚
-    // bflb_gpio_init(gpio, SENSOR_ADC_POWER_EN, GPIO_OUTPUT | GPIO_PULLUP | GPIO_SMT_EN | GPIO_DRV_0);
+    bflb_gpio_init(gpio, SENSOR_ADC_POWER_EN, GPIO_OUTPUT | GPIO_PULLUP | GPIO_SMT_EN | GPIO_DRV_0);
     bflb_gpio_init(gpio, BATTY_ADC_CHANNLE_PIN, GPIO_ANALOG | GPIO_SMT_EN | GPIO_DRV_0);
-    // bflb_gpio_set(gpio, SENSOR_ADC_POWER_EN);
+    bflb_gpio_set(gpio, SENSOR_ADC_POWER_EN);
 }
-
 
 static void adc_isr(int irq, void* arg)
 {
@@ -45,6 +44,7 @@ static void adc_isr(int irq, void* arg)
 
 void batty_adc_device_init(void)
 {
+    _batty_adc_gpio_init();
     adc = bflb_device_get_by_name("adc");
     struct bflb_adc_config_s cfg;
     cfg.clk_div = ADC_CLK_DIV_32;
@@ -64,6 +64,12 @@ void batty_adc_device_init(void)
     bflb_adc_rxint_mask(adc, false);
     bflb_irq_attach(adc->irq_num, adc_isr, NULL);
     bflb_irq_enable(adc->irq_num);
+}
+void batty_adc_device_deinit(void)
+{
+    bflb_gpio_reset(gpio, SENSOR_ADC_POWER_EN);
+    bflb_irq_disable(adc->irq_num);
+    bflb_adc_deinit(adc);
 }
 
 uint32_t batty_get_residual(void)
